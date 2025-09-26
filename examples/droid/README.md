@@ -82,3 +82,89 @@ uv run scripts/serve_policy.py policy:checkpoint --policy.config=paligemma_diffu
 ```
 
 You can find the inference configs in [roboarena_config.py](../../src/openpi/training/misc/roboarena_config.py).
+
+---
+
+# openpi의 DROID 정책 (한국어)
+
+다음 지침을 제공합니다:
+- [최상의 $pi_{0.5}$-DROID 정책에 대한 추론 실행하기](./README.md#running-droid-inference)
+- [다른 사전 훈련된 DROID 정책($\pi_0$, $\pi_0$-FAST, ...)에 대한 추론 실행하기](./README.md#running-roboarena-baseline-policies)
+- [*전체* DROID 데이터셋에서 *일반화* 정책 사전 훈련하기](./README_train.md#training-on-droid)
+- [사용자 정의 DROID 데이터셋에서 전문가 $\pi_{0.5}$ 미세 조정하기](./README_train.md#fine-tuning-on-custom-droid-datasets)
+
+## DROID 추론 실행하기
+
+이 예제는 [DROID 로봇 플랫폼](https://github.com/droid-dataset/droid)에서 미세 조정된 $\pi_{0.5}$-DROID 모델을 실행하는 방법을 보여줍니다. [공개 RoboArena 벤치마크](https://robo-arena.github.io/leaderboard)를 기반으로, 이것은 현재 가장 강력한 일반화 DROID 정책입니다.
+
+### 1단계: 정책 서버 시작하기
+
+DROID 제어 노트북에는 강력한 GPU가 없으므로, 더 강력한 GPU가 있는 다른 머신에서 원격 정책 서버를 시작한 다음 추론 중에 DROID 제어 노트북에서 쿼리합니다.
+
+1. 강력한 GPU(~NVIDIA 4090)가 있는 머신에서 [README](https://github.com/Physical-Intelligence/openpi)의 지침에 따라 `openpi` 저장소를 복제하고 설치합니다.
+2. 다음 명령을 통해 OpenPI 서버를 시작합니다:
+
+```bash
+uv run scripts/serve_policy.py policy:checkpoint --policy.config=pi05_droid --policy.dir=gs://openpi-assets/checkpoints/pi05_droid
+```
+
+아래의 동등한 명령을 실행할 수도 있습니다:
+
+```bash
+uv run scripts/serve_policy.py --env=DROID
+```
+
+### 2단계: DROID 로봇 실행하기
+
+1. DROID 제어 노트북과 NUC 모두에 최신 버전의 DROID 패키지가 설치되어 있는지 확인합니다.
+2. 제어 노트북에서 DROID conda 환경을 활성화합니다.
+3. openpi 저장소를 복제하고 정책 서버에 연결하는 데 사용할 openpi 클라이언트를 설치합니다 (의존성이 거의 없어 매우 빠르게 설치됨): DROID conda 환경이 활성화된 상태에서 `cd $OPENPI_ROOT/packages/openpi-client && pip install -e .`를 실행합니다.
+4. 명령줄 구문 분석에 사용할 `tyro`를 설치합니다: `pip install tyro`.
+5. 이 디렉토리의 `main.py` 파일을 `$DROID_ROOT/scripts` 디렉토리로 복사합니다.
+6. `main.py` 파일의 카메라 ID를 사용자의 카메라 ID로 바꿉니다 (명령줄에서 `ZED_Explorer`를 실행하여 카메라 ID를 찾을 수 있으며, 연결된 모든 카메라와 ID를 보여주는 도구가 열립니다. 이를 사용하여 로봇이 상호 작용하려는 장면을 카메라가 잘 볼 수 있는지 확인할 수도 있습니다).
+7. `main.py` 파일을 실행합니다. IP와 호스트 주소가 정책 서버를 가리키도록 하십시오. (서버 머신이 DROID 노트북에서 접근 가능한지 확인하려면 DROID 노트북에서 `ping <server_ip>`를 실행할 수 있습니다.) 또한 정책에 사용할 외부 카메라를 지정해야 합니다 (외부 카메라는 하나만 입력). ["left", "right"] 중에서 선택하십시오.
+
+```bash
+python3 scripts/main.py --remote_host=<server_ip> --remote_port=<server_port> --external_camera="left"
+```
+
+스크립트는 로봇이 따를 자유 형식의 언어 지침을 입력하라는 메시지를 표시합니다. 로봇이 상호 작용하려는 장면에 카메라를 향하게 하십시오. 카메라 각도, 객체 위치 등을 신중하게 제어할 필요는 _없습니다_. 저희 경험상 정책은 상당히 견고합니다. 즐거운 프롬프트 되세요!
+
+## 문제 해결
+
+| 문제 | 해결책 |
+|---|---|
+| 정책 서버에 연결할 수 없음 | 서버가 실행 중이고 IP와 포트가 올바른지 확인하십시오. DROID 노트북에서 `ping <server_ip>`를 실행하여 서버 머신에 연결할 수 있는지 확인할 수 있습니다. |
+| 카메라를 찾을 수 없음 | 카메라 ID가 올바른지, 카메라가 DROID 노트북에 연결되어 있는지 확인하십시오. 때때로 카메라를 다시 연결하면 도움이 될 수 있습니다. 명령줄에서 `ZED_Explore`를 실행하여 연결된 모든 카메라를 확인할 수 있습니다. |
+| 정책 추론이 느리거나 일관되지 않음 | DROID 노트북에 유선 인터넷 연결을 사용하여 지연 시간을 줄여보십시오 (청크당 0.5 - 1초 지연은 정상입니다). |
+| 정책이 작업을 잘 수행하지 못함 | 저희 실험에서 정책은 다양한 환경, 카메라 위치 및 조명 조건에서 간단한 테이블 위 조작 작업(집고 놓기)을 수행할 수 있었습니다. 정책이 작업을 잘 수행하지 못하면 장면이나 객체 배치를 수정하여 작업을 더 쉽게 만들 수 있습니다. 또한 정책에 전달하는 카메라 뷰가 장면의 모든 관련 객체를 볼 수 있는지 확인하십시오 (정책은 단일 외부 카메라 + 손목 카메라에만 의존하므로 원하는 카메라를 정책에 공급하고 있는지 확인하십시오). `ZED_Explore`를 사용하여 정책에 전달하는 카메라 뷰가 장면의 모든 관련 객체를 볼 수 있는지 확인하십시오. 마지막으로, 정책은 완벽과는 거리가 멀고 더 복잡한 조작 작업에서는 실패할 것이지만, 보통은 괜찮은 노력을 합니다. :) |
+
+
+## 다른 정책 실행하기
+
+[RoboArena](https://robo-arena.github.io/) 논문의 기준 DROID 정책을 실행하기 위한 설정을 제공합니다. 아래 명령을 실행하여 각 정책에 대한 추론 서버를 시작하십시오. 그런 다음 위의 지침에 따라 DROID 로봇에서 평가를 실행하십시오.
+
+```
+# pi0-FAST에서 훈련, FAST 토크나이저 사용
+uv run scripts/serve_policy.py policy:checkpoint --policy.config=pi0_fast_droid --policy.dir=gs://openpi-assets/checkpoints/pi0_fast_droid
+
+# pi0에서 훈련, 플로우 매칭 사용
+uv run scripts/serve_policy.py policy:checkpoint --policy.config=pi0_droid --policy.dir=gs://openpi-assets/checkpoints/pi0_droid
+
+# PaliGemma에서 훈련, RT-2 / OpenVLA 스타일 비닝 토크나이저 사용.
+uv run scripts/serve_policy.py policy:checkpoint --policy.config=paligemma_binning_droid --policy.dir=gs://openpi-assets/checkpoints/roboarena/paligemma_binning_droid
+
+# PaliGemma에서 훈련, FAST 토크나이저 사용 (범용 FAST+ 토크나이저 사용).
+uv run scripts/serve_policy.py policy:checkpoint --policy.config=paligemma_fast_droid --policy.dir=gs://openpi-assets/checkpoints/roboarena/paligemma_fast_droid
+
+# PaliGemma에서 훈련, FAST 토크나이저 사용 (DROID 데이터셋에서 훈련된 토크나이저).
+uv run scripts/serve_policy.py policy:checkpoint --policy.config=paligemma_fast_specialist_droid --policy.dir=gs://openpi-assets/checkpoints/roboarena/paligemma_fast_specialist_droid
+
+# PaliGemma에서 훈련, FSQ 토크나이저 사용.
+uv run scripts/serve_policy.py policy:checkpoint --policy.config=paligemma_vq_droid --policy.dir=gs://openpi-assets/checkpoints/roboarena/paligemma_vq_droid
+
+# PaliGemma에서 DROID로 훈련된 pi0 스타일 확산 / 플로우 VLA.
+uv run scripts/serve_policy.py policy:checkpoint --policy.config=paligemma_diffusion_droid --policy.dir=gs://openpi-assets/checkpoints/roboarena/paligemma_diffusion_droid
+```
+
+추론 설정은 [roboarena_config.py](../../src/openpi/training/misc/roboarena_config.py)에서 찾을 수 있습니다.
