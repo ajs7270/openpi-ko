@@ -42,7 +42,7 @@ class Args:
     open_loop_horizon: int = 8
 
     # Remote server parameters
-    remote_host: str = "0.0.0.0"  # point this to the IP address of the policy server, e.g., "192.168.1.100"
+    remote_host: str = "127.0.0.1"  # point this to the IP address of the policy server, e.g., "192.168.1.100"
     remote_port: int = (
         8000  # point this to the port of the policy server, default server port for openpi servers is 8000
     )

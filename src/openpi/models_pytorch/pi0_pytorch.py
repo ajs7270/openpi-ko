@@ -235,6 +235,9 @@ class PI0Pytorch(nn.Module):
         return embs, pad_masks, att_masks
 
     def embed_suffix(self, state, noisy_actions, timestep):
+        # state: (bsize, state_dim)
+        # noisy_actions: (bsize, action_horizon, action_dim)
+        # timestep: (bsize,)
         """Embed state, noisy_actions, timestep to prepare for Expert Gemma processing."""
         embs = []
         pad_masks = []

@@ -859,7 +859,7 @@ _CONFIGS = [
             action_dim=32,
             action_horizon=16,
         ),
-        data=RLDSDroidDataConfig(
+        data=RLDSDroidDataConfig( # jsA: RLDS 데이터 로더 사용 
             repo_id="droid",
             # Set this to the path to your DROID RLDS dataset (the parent directory of the `droid` directory).
             rlds_data_dir="/mnt/pi-data/kevin",
@@ -895,7 +895,7 @@ _CONFIGS = [
         ),
         data=LeRobotDROIDDataConfig(
             # Replace with your custom DROID LeRobot dataset repo id.
-            repo_id="your_hf_username/my_droid_dataset",
+            repo_id="jisuan/my_droid_dataset",
             base_config=DataConfig(prompt_from_task=True),
             assets=AssetsConfig(
                 # Important: reuse the original DROID norm stats during fine-tuning!
@@ -904,8 +904,8 @@ _CONFIGS = [
             ),
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_droid/params"),
-        num_train_steps=20_000,
-        batch_size=32,
+        num_train_steps=10,
+        batch_size=1,
     ),
     #
     # ALOHA Sim configs. This config is used to demonstrate how to train on a simple simulated environment.
