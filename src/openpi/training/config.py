@@ -859,7 +859,7 @@ _CONFIGS = [
             action_dim=32,
             action_horizon=16,
         ),
-        data=RLDSDroidDataConfig( # jsA: RLDS 데이터 로더 사용 
+        data=RLDSDroidDataConfig(  # jsA: RLDS 데이터 로더 사용
             repo_id="droid",
             # Set this to the path to your DROID RLDS dataset (the parent directory of the `droid` directory).
             rlds_data_dir="/mnt/pi-data/kevin",
@@ -904,8 +904,8 @@ _CONFIGS = [
             ),
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_droid/params"),
-        num_train_steps=10,
-        batch_size=1,
+        num_train_steps=100000,
+        batch_size=32,
     ),
     #
     # ALOHA Sim configs. This config is used to demonstrate how to train on a simple simulated environment.
@@ -927,7 +927,7 @@ _CONFIGS = [
     TrainConfig(
         name="debug",
         data=FakeDataConfig(),
-        batch_size=2,
+        batch_size=4,  # for AICA server (4 (H100) GPUs)
         model=pi0_config.Pi0Config(paligemma_variant="dummy", action_expert_variant="dummy"),
         save_interval=100,
         overwrite=True,

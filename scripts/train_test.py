@@ -15,7 +15,7 @@ from . import train
 def test_train(tmp_path: pathlib.Path, config_name: str):
     config = dataclasses.replace(
         _config._CONFIGS_DICT[config_name],  # noqa: SLF001
-        batch_size=2,
+        batch_size=4,  # (for AICA server (4 (H100) GPUs))
         checkpoint_base_dir=str(tmp_path / "checkpoint"),
         exp_name="test",
         overwrite=False,
