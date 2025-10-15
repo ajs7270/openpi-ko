@@ -1,0 +1,28 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        
+        {
+            "name": "train: pi05_droid_finetune",
+            "type": "python",
+            "request": "launch",
+            "program": "/home/work/jnpahk/jisuan/openpi/scripts/train_pytorch.py",
+            "args": [
+                "pi05_droid_finetune",
+                "--exp-name=my_experiment",
+                "--overwrite",
+                "--num-workers=0" // debug mode에서는 데이터 로더 워크를 spawn 방식으로 띄우는 과정에에서 오류 발생
+            ],
+            "cwd": "/home/work/jnpahk/jisuan/openpi",
+            "console": "integratedTerminal",
+            "python": "/home/work/jnpahk/jisuan/openpi/.venv/bin/python",
+            "env": {
+                "VIRTUAL_ENV": "/home/work/jnpahk/jisuan/openpi/.venv",
+                "PATH": "/home/work/jnpahk/jisuan/openpi/.venv/bin:${env:PATH}",
+                "PYTHONPATH": "/home/work/jnpahk/jisuan/openpi/.venv/lib/python3.11/site-packages:${env:PYTHONPATH}"
+            },
+            "justMyCode": false
+        }
+    ]
+}
+

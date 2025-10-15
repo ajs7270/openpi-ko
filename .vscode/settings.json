@@ -3,6 +3,8 @@
         "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.formatOnSave": true,
     },
+    "python.defaultInterpreterPath": "/home/work/jnpahk/jisuan/openpi/.venv/bin/python",
+    "python.terminal.activateEnvironment": true,
     "python.testing.pytestArgs": [
         "src"
     ],
